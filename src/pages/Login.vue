@@ -74,13 +74,28 @@ const form = reactive({
 const handleLogin = async () => {
   if (!form.email || !form.password) return
   loading.value = true
-  // TODO: Connect to backend API
-  setTimeout(() => {
+  
+  try {
+    const res = await fetch('http://localhost:3001/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    })
+    const data = await res.json()
+
+    if (data.success) {
+      localStorage.setItem('nt_token', data.data.token)
+      localStorage.setItem('nt_user', JSON.stringify(data.data.user))
+      // Redirect to home page
+      router.push('/home')
+    } else {
+      alert(data.message || 'Login failed')
+    }
+  } catch (err) {
+    alert('Server error. Please check your connection.')
+  } finally {
     loading.value = false
-    localStorage.setItem('nt_token', 'demo_token')
-    localStorage.setItem('nt_user', JSON.stringify({ email: form.email, vipLevel: 'V' }))
-    router.push('/')
-  }, 1200)
+  }
 }
 </script>
 

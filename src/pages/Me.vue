@@ -13,6 +13,17 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
+      <!-- Balance Card -->
+      <div class="balance-card">
+        <div class="balance-info">
+          <div class="label">Total Assets (USDT)</div>
+          <div class="value">{{ totalBalance.toFixed(2) }}</div>
+        </div>
+        <div class="eye-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+      </div>
+
       <div class="profile-actions">
         <router-link to="/upgrade" class="profile-action-card">
           <span class="profile-action-icon">🏆</span>
@@ -66,10 +77,16 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-const stored = JSON.parse(localStorage.getItem('nt_user') || '{}')
-const user = reactive({ email: stored.email || '', vipLevel: stored.vipLevel || 'V' })
+const router = useRouter()
+const user = ref({
+  email: 'Loading...',
+  vipLevel: '',
+  id: ''
+})
+const totalBalance = ref(0)
 
 const menuItems = [
   { label: 'Security Center', path: '/security', bg: '#E8F0FF', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A6CFF" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' },
@@ -86,10 +103,43 @@ const menuItems2 = [
   { label: 'Help Center', path: '/help', bg: '#F3E8FF', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
   { label: 'Service', path: '/service', bg: '#E8F0FF', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A6CFF" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' },
 ]
+
+const fetchData = async () => {
+  const token = localStorage.getItem('nt_token')
+  if (!token) return router.push('/login')
+
+  try {
+    // Fetch user profile
+    const resUser = await fetch('http://localhost:3001/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const dataUser = await resUser.json()
+    if (dataUser.success) {
+      user.value = dataUser.data
+    }
+
+    // Fetch wallet balance
+    const resWallet = await fetch('http://localhost:3001/api/wallet', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const dataWallet = await resWallet.json()
+    if (dataWallet.success) {
+      totalBalance.value = dataWallet.data.totalUSD
+    }
+  } catch (err) {
+    console.error('Failed to fetch data', err)
+  }
+}
+
+onMounted(() => {
+  const stored = JSON.parse(localStorage.getItem('nt_user') || '{}')
+  if (stored.email) user.value = stored
+  fetchData()
+})
 </script>
 
 <style scoped>
-.me-page { background: var(--bg); }
+.me-page { background: var(--bg); padding-bottom: 80px; }
 
 .profile-header {
   padding: 20px 16px;
@@ -127,6 +177,19 @@ const menuItems2 = [
   border-radius: var(--radius-full);
   margin-top: 4px;
 }
+
+.balance-card {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--bg);
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balance-info .label { font-size: 12px; color: var(--text-secondary); }
+.balance-info .value { font-size: 20px; font-weight: 700; margin-top: 4px; }
 
 .profile-actions {
   display: flex;

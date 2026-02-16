@@ -55,7 +55,7 @@
         {{ message }}
       </div>
 
-      <button class="btn btn-primary btn-lg" :disabled="!agreed || loading" @click="handleRegister" style="margin-top:24px;">
+      <button class="btn btn-primary btn-lg" :disabled="loading" @click="handleRegister" style="margin-top:24px;">
         <span v-if="loading" class="spinner"></span>
         <span v-else>Register</span>
       </button>
@@ -133,7 +133,7 @@ const handleRegister = async () => {
     return
   }
   if (!agreed.value) {
-    showMessage('Please agree to the terms')
+    showMessage('Please agree to the terms (User Agreement)')
     return
   }
 
@@ -142,7 +142,14 @@ const handleRegister = async () => {
     const res = await fetch('http://localhost:3001/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify({
+        email: form.email,
+        password: form.password,
+        code: form.verifyCode,
+        inviteCode: form.inviteCode
+      })
+
+      
     })
     const data = await res.json()
     
@@ -151,7 +158,7 @@ const handleRegister = async () => {
       localStorage.setItem('nt_token', data.data.token)
       localStorage.setItem('nt_user', JSON.stringify(data.data.user))
       // Add slight delay to show success message
-      setTimeout(() => router.push('/'), 1000)
+      setTimeout(() => router.push('/home'), 1000)
     } else {
       showMessage(data.message || 'Registration failed')
     }
