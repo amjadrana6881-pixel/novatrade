@@ -35,13 +35,27 @@ import { ref, onMounted } from 'vue'
 
 const inviteCode = ref('')
 const stats = ref({ l1: 0, l2: 0, l3: 0, teamBalance: 0 })
-const rates = [
-  {level:'V-V4',l1:'10%',l2:'3%',l3:'1%'},
-  {level:'V5',l1:'11%',l2:'4%',l3:'1%'},
-  {level:'V6',l1:'12%',l2:'5%',l3:'1%'},
-  {level:'V7',l1:'13%',l2:'6%',l3:'1%'},
-  {level:'V8',l1:'14%',l2:'7%',l3:'1%'},
-]
+const rates = ref([])
+
+const fetchConfig = async () => {
+  try {
+    const res = await fetch('http://localhost:3001/api/config/public')
+    const data = await res.json()
+    if (data.success && data.data.referral_rates) {
+      rates.value = data.data.referral_rates
+    }
+  } catch (err) {
+    console.error(err)
+    // Fallback
+    rates.value = [
+      {level:'V-V4',l1:'10%',l2:'3%',l3:'1%'},
+      {level:'V5',l1:'11%',l2:'4%',l3:'1%'},
+      {level:'V6',l1:'12%',l2:'5%',l3:'1%'},
+      {level:'V7',l1:'13%',l2:'6%',l3:'1%'},
+      {level:'V8',l1:'14%',l2:'7%',l3:'1%'},
+    ]
+  }
+}
 
 const fetchReferrals = async () => {
   const token = localStorage.getItem('nt_token')
@@ -66,7 +80,10 @@ const fetchReferrals = async () => {
 const copyLink = () => { navigator.clipboard?.writeText(`https://novatrade-zeta.vercel.app/register?ref=${inviteCode.value}`) }
 const genPoster = () => { alert('Poster generation coming soon!') }
 
-onMounted(fetchReferrals)
+onMounted(() => {
+  fetchConfig()
+  fetchReferrals()
+})
 </script>
 <style scoped>
 .invite-banner{margin:16px;padding:24px;background:linear-gradient(135deg,#1A3A8A,#1A6CFF);border-radius:var(--radius-lg);text-align:center}

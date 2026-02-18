@@ -61,7 +61,7 @@
 
     <!-- Second Section -->
     <div class="menu-section" style="margin-top:12px;">
-      <router-link v-for="item in menuItems2" :key="item.path" :to="item.path" class="list-item">
+      <div v-for="item in menuItems2" :key="item.label" class="list-item" @click="handleMenuClick(item)">
         <div class="list-item__left">
           <div class="list-item__icon" :style="{ background: item.bg }">
             <span v-html="item.icon"></span>
@@ -71,7 +71,7 @@
         <div class="list-item__right">
           <span class="list-item__arrow">›</span>
         </div>
-      </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -126,9 +126,25 @@ const fetchData = async () => {
     if (dataWallet.success) {
       totalBalance.value = dataWallet.data.totalUSD
     }
+
+    // Fetch Config for Support Link
+    const resConfig = await fetch('http://localhost:3001/api/config/public')
+    const dataConfig = await resConfig.json()
+    if (dataConfig.success && dataConfig.data.support_link) {
+      const serviceItem = menuItems2.find(i => i.label === 'Service')
+      if (serviceItem) {
+        serviceItem.path = '' // Disable internal routing
+        serviceItem.action = () => window.open(dataConfig.data.support_link, '_blank')
+      }
+    }
   } catch (err) {
     console.error('Failed to fetch data', err)
   }
+}
+
+const handleMenuClick = (item) => {
+  if (item.action) item.action()
+  else router.push(item.path)
 }
 
 onMounted(() => {

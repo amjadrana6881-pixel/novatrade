@@ -120,6 +120,18 @@ const coins = ref([])
 
 const announcement = ref('Welcome to NovaTrade – Your Trusted Crypto Exchange 🚀')
 
+const fetchConfig = async () => {
+  try {
+    const res = await fetch('http://localhost:3001/api/config/public')
+    const data = await res.json()
+    if (data.success) {
+      if (data.data.announcement) announcement.value = data.data.announcement
+    }
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 const defaultBanners = [
   { title: 'AI Quant Trading', description: 'Smart robots, auto profit 24/7', bg: 'linear-gradient(135deg, #1A3A8A, #1A6CFF)' },
   { title: '50 USDT Reward', description: 'Invite friends & earn trial fund', bg: 'linear-gradient(135deg, #00856F, #00C087)' },
@@ -214,6 +226,7 @@ let bannerTimer
 onMounted(() => {
   fetchBanners()
   fetchPrices()
+  fetchConfig()
   bannerTimer = setInterval(() => {
     bannerIdx.value = (bannerIdx.value + 1) % banners.value.length
   }, 4000)

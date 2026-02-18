@@ -28,26 +28,35 @@ const coins = ['USDT','BTC','ETH','BNB','XRP','SOL','DOGE','ADA','DOT','AVAX']
 const networks = ['TRC20','ERC20','BEP20']
 const address = ref('')
 
-const trc20Addresses = [
-  'THPvaUhoh2Qn2y9THCZML3H815dbwQG1sZ',
-  'TKr99jX4y4rF1wD9x815dbwQG1sZTHPvaU',
-  'TMuA6YqfCeX8Dgm1x815dbwQG1sZTHPvaU',
-  'TVjs55o77Qn2y9THCZML3H815dbwQG1sZT',
-  'TXp11qY4y4rF1wD9x815dbwQG1sZTHPvaU',
-  'TYz88pQfCeX8Dgm1x815dbwQG1sZTHPvaU',
-  'TAa22bUhoh2Qn2y9THCZML3H815dbwQG1s',
-  'TBc33cX4y4rF1wD9x815dbwQG1sZTHPvaU',
-  'TCd44dQfCeX8Dgm1x815dbwQG1sZTHPvaU',
-  'TEf55eUhoh2Qn2y9THCZML3H815dbwQG1s'
-]
-
+const trc20Addresses = ref([])
 const qrUrl = ref('')
 
+const fetchConfig = async () => {
+  try {
+    const res = await fetch('http://localhost:3001/api/config/public')
+    const data = await res.json()
+    if (data.success && data.data.deposit_addresses) {
+      trc20Addresses.value = data.data.deposit_addresses
+      setRandomAddress()
+    }
+  } catch (err) {
+    console.error(err)
+    // Fallback if fetch fails
+    trc20Addresses.value = ['THPvaUhoh2Qn2y9THCZML3H815dbwQG1sZ']
+    setRandomAddress()
+  }
+}
+
+const setRandomAddress = () => {
+  if (trc20Addresses.value.length > 0) {
+    const randomIndex = Math.floor(Math.random() * trc20Addresses.value.length)
+    address.value = trc20Addresses.value[randomIndex]
+    qrUrl.value = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${address.value}`
+  }
+}
+
 onMounted(() => {
-  // Randomly select one address
-  const randomIndex = Math.floor(Math.random() * trc20Addresses.length)
-  address.value = trc20Addresses[randomIndex]
-  qrUrl.value = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${address.value}`
+  fetchConfig()
 })
 
 const copyAddr = () => { 

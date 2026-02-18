@@ -27,11 +27,58 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+
 const showAdd = ref(false)
 const addresses = ref([])
 const newAddr = reactive({ label: '', coin: 'USDT', network: 'TRC20', address: '' })
-const addAddress = () => { if(newAddr.label&&newAddr.address) { addresses.value.push({...newAddr}); showAdd.value=false; newAddr.label=''; newAddr.address='' } }
+
+const fetchAddresses = async () => {
+  const token = localStorage.getItem('nt_token')
+  if(!token) return
+  try {
+    const res = await fetch('http://localhost:3001/api/user/addresses', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const data = await res.json()
+    if(data.success) addresses.value = data.data
+  } catch(e){console.error(e)}
+}
+
+const addAddress = async () => {
+    const token = localStorage.getItem('nt_token')
+    if(newAddr.label && newAddr.address) {
+        try {
+            const res = await fetch('http://localhost:3001/api/user/addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(newAddr)
+            })
+            const data = await res.json()
+            if(data.success) {
+                addresses.value.unshift(data.data)
+                showAdd.value = false
+                newAddr.label = ''; newAddr.address = ''
+            } else { alert(data.message) }
+        } catch(e){console.error(e)}
+    }
+}
+
+const removeAddress = async (id, index) => {
+    if(!confirm('Delete this address?')) return
+    const token = localStorage.getItem('nt_token')
+    try {
+        const res = await fetch(`http://localhost:3001/api/user/addresses/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+        if(data.success) addresses.value.splice(index, 1)
+        else alert(data.message)
+    } catch(e){console.error(e)}
+}
+
+onMounted(fetchAddresses)
 </script>
 <style scoped>
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:flex-end;justify-content:center}

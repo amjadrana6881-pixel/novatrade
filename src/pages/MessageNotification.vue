@@ -15,11 +15,37 @@
   </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+
 const tab = ref('All')
-const messages = ref([
-  { id: 1, type: 'System', title: 'Welcome to NovaTrade', content: 'Your account has been created. Complete KYC to unlock all features.', time: '2026-02-15' },
-  { id: 2, type: 'System', title: 'Security Reminder', content: 'Please set your transaction password for secure withdrawals.', time: '2026-02-15' },
-])
-const filteredMessages = computed(() => tab.value === 'All' ? messages.value : messages.value.filter(m => m.type === tab.value))
+const messages = ref([])
+
+const fetchMessages = async () => {
+    const token = localStorage.getItem('nt_token')
+    if(!token) return
+    try {
+        const res = await fetch('http://localhost:3001/api/notification', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const data = await res.json()
+        if (data.success) {
+            // Flatten the notification object structure if needed, but assuming API returns array
+            // The API returns { notifications: [], unreadCount: 0 } inside data
+            messages.value = data.data.notifications.map(m => ({
+                id: m.id,
+                type: m.type === 'system' ? 'System' : 'Transaction', // Map backend type to frontend labels
+                title: m.title,
+                content: m.content,
+                time: new Date(m.createdAt).toLocaleDateString()
+            }))
+        }
+    } catch(e) { console.error(e) }
+}
+
+const filteredMessages = computed(() => {
+    if (tab.value === 'All') return messages.value
+    return messages.value.filter(m => m.type === tab.value)
+})
+
+onMounted(fetchMessages)
 </script>

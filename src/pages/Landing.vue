@@ -61,6 +61,9 @@
 
 .logo-container {
   margin-bottom: 40px;
+      display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .app-logo {

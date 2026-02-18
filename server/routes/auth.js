@@ -153,7 +153,21 @@ router.post('/reset-password', async (req, res) => {
 // Get current user
 router.get('/me', auth, async (req, res) => {
     const user = req.user;
-    res.json({ success: true, data: { id: user.id, email: user.email, nickname: user.nickname, avatar: user.avatar, vipLevel: user.vipLevel, inviteCode: user.inviteCode, kycStatus: user.kycStatus, isAdmin: user.isAdmin, createdAt: user.createdAt } });
+    res.json({
+        success: true,
+        data: {
+            id: user.id,
+            email: user.email,
+            nickname: user.nickname,
+            avatar: user.avatar,
+            vipLevel: user.vipLevel,
+            inviteCode: user.inviteCode,
+            kycStatus: user.kycStatus,
+            isAdmin: user.isAdmin,
+            createdAt: user.createdAt,
+            hasTransactionPassword: !!user.transactionPassword
+        }
+    });
 });
 
 module.exports = router;
