@@ -65,14 +65,56 @@ router.post('/kyc', auth, async (req, res) => {
     }
 });
 
-// Get referral info
+// Get referral info (3 Levels)
 router.get('/referrals', auth, async (req, res) => {
     try {
-        const referrals = await prisma.user.findMany({
-            where: { invitedBy: req.user.inviteCode },
+        const myCode = req.user.inviteCode;
+
+        // Level 1
+        const level1 = await prisma.user.findMany({
+            where: { invitedBy: myCode },
+            select: { id: true, email: true, vipLevel: true, createdAt: true, inviteCode: true }
+        });
+
+        // Level 2
+        const l1Codes = level1.map(u => u.inviteCode);
+        const level2 = await prisma.user.findMany({
+            where: { invitedBy: { in: l1Codes } },
+            select: { id: true, email: true, vipLevel: true, createdAt: true, inviteCode: true }
+        });
+
+        // Level 3
+        const l2Codes = level2.map(u => u.inviteCode);
+        const level3 = await prisma.user.findMany({
+            where: { invitedBy: { in: l2Codes } },
             select: { id: true, email: true, vipLevel: true, createdAt: true }
         });
-        res.json({ success: true, data: { inviteCode: req.user.inviteCode, count: referrals.length, referrals } });
+
+        // Calculate Team Balance (Simplified - just sum spot USDT of all team members)
+        const allTeamIds = [...level1, ...level2, ...level3].map(u => u.id);
+        const wallets = await prisma.wallet.findMany({
+            where: { userId: { in: allTeamIds }, coin: 'USDT', account: 'spot' }
+        });
+        const teamBalance = wallets.reduce((sum, w) => sum + w.available + w.frozen, 0);
+
+        res.json({
+            success: true,
+            data: {
+                inviteCode: myCode,
+                stats: {
+                    l1: level1.length,
+                    l2: level2.length,
+                    l3: level3.length,
+                    total: level1.length + level2.length + level3.length,
+                    teamBalance
+                },
+                referrals: {
+                    level1,
+                    level2,
+                    level3
+                }
+            }
+        });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

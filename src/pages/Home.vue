@@ -163,9 +163,10 @@ const formatPrice = (p) => {
 
 const fetchPrices = async () => {
   try {
-    const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=30&page=1&sparkline=false')
-    if (res.ok) {
-      coins.value = await res.json()
+    const res = await fetch('http://localhost:3001/api/market/prices')
+    const data = await res.json()
+    if (data.success) {
+      coins.value = data.data
     } else {
       useMockData()
     }

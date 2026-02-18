@@ -105,9 +105,9 @@ const fetchRobots = async () => {
 
 const fetchBalance = async () => {
   try {
-    const res = await fetch(`${API}/wallet/balances`, { headers }).then(r => r.json())
-    if (res.success) {
-      const usdtWallet = res.data.find(w => w.coin === 'USDT' && w.account === 'spot')
+    const res = await fetch(`${API}/wallet`, { headers }).then(r => r.json())
+    if (res.success && res.data.wallets) {
+      const usdtWallet = res.data.wallets.find(w => w.coin === 'USDT' && w.account === 'spot')
       balance.value = usdtWallet ? usdtWallet.available : 0
     }
   } catch (err) { balance.value = 0 }

@@ -28,7 +28,7 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-const mainPaths = ['/home', '/ai', '/exchange', '/contract', '/assets']
+const mainPaths = ['/home', '/ai', '/exchange', '/contract', '/assets', '/me']
 
 const showNav = computed(() => mainPaths.includes(route.path))
 
@@ -51,9 +51,9 @@ const tabs = [
     icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`
   },
   {
-    path: '/contract',
-    label: 'Contract',
-    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M6 8l4 4 3-3 5 5"/></svg>`
+    path: '/me',
+    label: 'Me',
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
   },
   {
     path: '/assets',

@@ -110,6 +110,12 @@ async function seedData() {
     }
 }
 
+// Scheduler for Robot Settlement (Every 1 minute)
+const { processExpiredOrders } = require('./routes/robot'); // Import the function
+setInterval(() => {
+    processExpiredOrders();
+}, 60 * 1000); // Check every minute
+
 server.listen(PORT, async () => {
     console.log(`\n🚀 NovaTrade API running on http://localhost:${PORT}`);
     console.log(`📋 Health: http://localhost:${PORT}/api/health\n`);

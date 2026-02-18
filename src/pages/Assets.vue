@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const showBalance = ref(true)
 const activeTab = ref('Spot')
@@ -101,6 +101,45 @@ const walletCoins = ref([
   { symbol: 'SHIB', name: 'Shiba Inu', available: '0.000000', value: '0.00', color: '#FFA409' },
   { symbol: 'FIL', name: 'Filecoin', available: '0.000000', value: '0.00', color: '#0090FF' },
 ])
+
+const fetchWallet = async () => {
+  const token = localStorage.getItem('nt_token')
+  if (!token) return
+
+  try {
+    const res = await fetch('http://localhost:3001/api/wallet', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const data = await res.json()
+    if (data.success) {
+      totalBalance.value = data.data.totalUSD
+      
+      const walletMap = {}
+      if (data.data.wallets) {
+        data.data.wallets.forEach(w => {
+          if (w.account === 'spot') walletMap[w.coin] = w
+        })
+      }
+      
+      // Update coins with real balance
+      walletCoins.value = walletCoins.value.map(c => {
+        const w = walletMap[c.symbol]
+        // Note: For value, we ideally need live prices. For now using static or if backend provides it.
+        // The backend calculates totalUSD but doesn't return per-coin price in wallet endpoint directly unless we enhanced it.
+        // We will just use the balance for now.
+        return {
+          ...c,
+          available: w ? w.available : 0,
+          value: w ? (w.available * 1).toFixed(2) : '0.00' // Placeholder for value calculation
+        }
+      })
+    }
+  } catch (err) {
+    console.error('Failed to fetch wallet', err)
+  }
+}
+
+onMounted(fetchWallet)
 </script>
 
 <style scoped>
