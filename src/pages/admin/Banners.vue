@@ -69,7 +69,8 @@
 </template>
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-const apiBase = 'http://localhost:3001'
+import API_BASE_URL from '../../config/api.js'
+const apiBase = API_BASE_URL
 const API = `${apiBase}/api`
 const token = localStorage.getItem('nt_admin_token')
 const headers = { Authorization: `Bearer ${token}` }

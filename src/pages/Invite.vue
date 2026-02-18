@@ -32,6 +32,7 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
+import API_BASE_URL from '../config/api.js'
 
 const inviteCode = ref('')
 const stats = ref({ l1: 0, l2: 0, l3: 0, teamBalance: 0 })
@@ -39,7 +40,7 @@ const rates = ref([])
 
 const fetchConfig = async () => {
   try {
-    const res = await fetch('http://localhost:3001/api/config/public')
+    const res = await fetch(`${API_BASE_URL}/api/config/public`)
     const data = await res.json()
     if (data.success && data.data.referral_rates) {
       rates.value = data.data.referral_rates
@@ -62,7 +63,7 @@ const fetchReferrals = async () => {
   if (!token) return
 
   try {
-    const res = await fetch('http://localhost:3001/api/user/referrals', {
+    const res = await fetch(`${API_BASE_URL}/api/user/referrals`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()

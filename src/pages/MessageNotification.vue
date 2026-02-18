@@ -16,6 +16,7 @@
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import API_BASE_URL from '../config/api.js'
 
 const tab = ref('All')
 const messages = ref([])
@@ -24,7 +25,7 @@ const fetchMessages = async () => {
     const token = localStorage.getItem('nt_token')
     if(!token) return
     try {
-        const res = await fetch('http://localhost:3001/api/notification', {
+        const res = await fetch(`${API_BASE_URL}/api/notification`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         const data = await res.json()

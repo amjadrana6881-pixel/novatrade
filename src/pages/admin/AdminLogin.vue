@@ -16,6 +16,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import API_BASE_URL from '../../config/api.js'
 const router = useRouter()
 const email = ref('admin@novatrade.com')
 const password = ref('')
@@ -26,7 +27,7 @@ const handleLogin = async () => {
   if (!email.value || !password.value) { error.value = 'Please fill in all fields'; return }
   loading.value = true; error.value = ''
   try {
-    const res = await fetch('http://localhost:3001/api/auth/login', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value, password: password.value })
     })

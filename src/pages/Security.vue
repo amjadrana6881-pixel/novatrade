@@ -40,6 +40,7 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
+import API_BASE_URL from '../config/api.js'
 
 const user = ref({
   email: '',
@@ -52,7 +53,7 @@ const fetchUser = async () => {
   if(!token) return
   
   try {
-    const res = await fetch('http://localhost:3001/api/auth/me', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()

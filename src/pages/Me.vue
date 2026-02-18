@@ -79,6 +79,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import API_BASE_URL from '../config/api.js'
 
 const router = useRouter()
 const user = ref({
@@ -110,7 +111,7 @@ const fetchData = async () => {
 
   try {
     // Fetch user profile
-    const resUser = await fetch('http://localhost:3001/api/auth/me', {
+    const resUser = await fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const dataUser = await resUser.json()
@@ -119,7 +120,7 @@ const fetchData = async () => {
     }
 
     // Fetch wallet balance
-    const resWallet = await fetch('http://localhost:3001/api/wallet', {
+    const resWallet = await fetch(`${API_BASE_URL}/api/wallet`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const dataWallet = await resWallet.json()
@@ -128,7 +129,7 @@ const fetchData = async () => {
     }
 
     // Fetch Config for Support Link
-    const resConfig = await fetch('http://localhost:3001/api/config/public')
+    const resConfig = await fetch(`${API_BASE_URL}/api/config/public`)
     const dataConfig = await resConfig.json()
     if (dataConfig.success && dataConfig.data.support_link) {
       const serviceItem = menuItems2.find(i => i.label === 'Service')

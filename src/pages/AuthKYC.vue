@@ -32,6 +32,7 @@
 <script setup>
 import { reactive, ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import API_BASE_URL from '../config/api.js'
 
 const router = useRouter()
 const status = ref('none') // none, pending, approved, rejected
@@ -61,7 +62,7 @@ const fetchKYC = async () => {
   if(!token) return
   
   try {
-    const res = await fetch('http://localhost:3001/api/auth/me', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
@@ -81,7 +82,7 @@ const submitKYC = async () => {
   if(!form.name || !form.idNumber || !form.country) return alert('Please fill all fields')
 
   try {
-    const res = await fetch('http://localhost:3001/api/user/kyc', {
+    const res = await fetch(`${API_BASE_URL}/api/user/kyc`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(form)

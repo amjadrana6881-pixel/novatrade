@@ -28,6 +28,7 @@
 </template>
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import API_BASE_URL from '../config/api.js'
 
 const showAdd = ref(false)
 const addresses = ref([])
@@ -37,7 +38,7 @@ const fetchAddresses = async () => {
   const token = localStorage.getItem('nt_token')
   if(!token) return
   try {
-    const res = await fetch('http://localhost:3001/api/user/addresses', {
+    const res = await fetch(`${API_BASE_URL}/api/user/addresses`, {
         headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
@@ -49,7 +50,7 @@ const addAddress = async () => {
     const token = localStorage.getItem('nt_token')
     if(newAddr.label && newAddr.address) {
         try {
-            const res = await fetch('http://localhost:3001/api/user/addresses', {
+            const res = await fetch(`${API_BASE_URL}/api/user/addresses`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(newAddr)
@@ -68,7 +69,7 @@ const removeAddress = async (id, index) => {
     if(!confirm('Delete this address?')) return
     const token = localStorage.getItem('nt_token')
     try {
-        const res = await fetch(`http://localhost:3001/api/user/addresses/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/user/addresses/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         })

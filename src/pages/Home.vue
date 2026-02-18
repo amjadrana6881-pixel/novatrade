@@ -23,7 +23,7 @@
     <div class="banner-carousel">
       <div class="banner-track" :style="{ transform: `translateX(-${bannerIdx * 100}%)` }">
         <div v-for="(b, i) in banners" :key="i" class="banner-slide">
-          <img v-if="b.imageUrl" :src="b.imageUrl.startsWith('http') ? b.imageUrl : `http://localhost:3001${b.imageUrl}`" :alt="b.title" class="banner-image"/>
+          <img v-if="b.imageUrl" :src="b.imageUrl.startsWith('http') ? b.imageUrl : `${API_BASE_URL}${b.imageUrl}`" :alt="b.title" class="banner-image"/>
           <div v-else class="banner-bg" :style="{ background: b.bg }"></div>
           <div class="banner-overlay">
             <h3>{{ b.title }}</h3>
@@ -112,6 +112,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import API_BASE_URL from '../config/api.js'
 
 const bannerIdx = ref(0)
 const pairFilter = ref('USDT')
@@ -122,7 +123,7 @@ const announcement = ref('Welcome to NovaTrade – Your Trusted Crypto Exchange 
 
 const fetchConfig = async () => {
   try {
-    const res = await fetch('http://localhost:3001/api/config/public')
+    const res = await fetch(`${API_BASE_URL}/api/config/public`)
     const data = await res.json()
     if (data.success) {
       if (data.data.announcement) announcement.value = data.data.announcement
@@ -175,7 +176,7 @@ const formatPrice = (p) => {
 
 const fetchPrices = async () => {
   try {
-    const res = await fetch('http://localhost:3001/api/market/prices')
+    const res = await fetch(`${API_BASE_URL}/api/market/prices`)
     const data = await res.json()
     if (data.success) {
       coins.value = data.data
@@ -211,7 +212,7 @@ const useMockData = () => {
 // Fetch banners from API
 const fetchBanners = async () => {
   try {
-    const res = await fetch('http://localhost:3001/api/banners')
+    const res = await fetch(`${API_BASE_URL}/api/banners`)
     const data = await res.json()
     if (data.success && data.data.length > 0) {
       banners.value = data.data

@@ -21,6 +21,7 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
+import API_BASE_URL from '../config/api.js'
 
 const coin = ref('USDT')
 const network = ref('TRC20')
@@ -33,7 +34,7 @@ const qrUrl = ref('')
 
 const fetchConfig = async () => {
   try {
-    const res = await fetch('http://localhost:3001/api/config/public')
+    const res = await fetch(`${API_BASE_URL}/api/config/public`)
     const data = await res.json()
     if (data.success && data.data.deposit_addresses) {
       trc20Addresses.value = data.data.deposit_addresses

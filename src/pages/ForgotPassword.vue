@@ -49,6 +49,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import API_BASE_URL from '../config/api.js'
 
 const router = useRouter()
 const countdown = ref(0)
@@ -77,7 +78,7 @@ const sendCode = async () => {
   if (countdown.value > 0) return
 
   try {
-    const res = await fetch('http://localhost:3001/api/auth/send-code', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/send-code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: form.email, type: 'reset' })
@@ -110,7 +111,7 @@ const handleReset = async () => {
 
   loading.value = true
   try {
-    const res = await fetch('http://localhost:3001/api/auth/reset-password', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

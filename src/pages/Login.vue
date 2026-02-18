@@ -61,6 +61,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import API_BASE_URL from '../config/api.js'
 
 const router = useRouter()
 const showPwd = ref(false)
@@ -76,7 +77,7 @@ const handleLogin = async () => {
   loading.value = true
   
   try {
-    const res = await fetch('http://localhost:3001/api/auth/login', {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form)

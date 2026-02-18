@@ -20,6 +20,7 @@
 </template>
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import API_BASE_URL from '../config/api.js'
 
 const tab = ref('Running')
 const orders = ref([])
@@ -29,7 +30,7 @@ const fetchOrders = async () => {
   if(!token) return
   
   try {
-    const res = await fetch('http://localhost:3001/api/robot/orders', {
+    const res = await fetch(`${API_BASE_URL}/api/robot/orders`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()

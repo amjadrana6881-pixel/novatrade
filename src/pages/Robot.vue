@@ -76,8 +76,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import API_BASE_URL from '../config/api.js'
 
-const API = 'http://localhost:3001/api'
+const API = `${API_BASE_URL}/api`
 const token = localStorage.getItem('nt_token')
 const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
 
