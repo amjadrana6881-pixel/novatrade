@@ -52,7 +52,7 @@
         <div class="form-group">
           <label>Image {{ editing ? '(leave empty to keep current)' : '*' }}</label>
           <div class="file-upload">
-            <input type="file" ref="fileInput" accept="image/*" @change="handleFile" class="file-input"/>
+            <input type="file" ref="fileInput" accept="image/*,.svg" @change="handleFile" class="file-input"/>
             <div v-if="previewUrl" class="preview-wrap">
               <img :src="previewUrl" class="preview-img"/>
             </div>
