@@ -23,7 +23,7 @@
     <div class="banner-carousel">
       <div class="banner-track" :style="{ transform: `translateX(-${bannerIdx * 100}%)` }">
         <div v-for="(b, i) in banners" :key="i" class="banner-slide">
-          <img v-if="b.imageUrl" :src="b.imageUrl.startsWith('http') ? b.imageUrl : `${API_BASE_URL}${b.imageUrl}`" :alt="b.title" class="banner-image"/>
+          <img v-if="b.imageUrl" :src="b.imageUrl.startsWith('data:') || b.imageUrl.startsWith('http') ? b.imageUrl : `${API_BASE_URL}${b.imageUrl}`" :alt="b.title" class="banner-image"/>
           <div v-else class="banner-bg" :style="{ background: b.bg }"></div>
           <div class="banner-overlay">
             <h3>{{ b.title }}</h3>

@@ -9,7 +9,7 @@
     <div class="banner-grid">
       <div v-for="b in banners" :key="b.id" class="banner-card">
         <div class="banner-img-wrap">
-          <img :src="apiBase + b.imageUrl" :alt="b.title" class="banner-img"/>
+          <img :src="b.imageUrl.startsWith('data:') ? b.imageUrl : apiBase + b.imageUrl" :alt="b.title" class="banner-img"/>
           <div class="banner-badges">
             <span class="badge-sm" :class="{active: b.isActive, inactive: !b.isActive}">{{ b.isActive ? 'Active' : 'Hidden' }}</span>
             <span class="order-badge">Order: {{ b.sortOrder }}</span>
@@ -131,7 +131,7 @@ const editBanner = (b) => {
   form.linkUrl = b.linkUrl || ''
   form.sortOrder = b.sortOrder
   form.isActive = b.isActive
-  previewUrl.value = apiBase + b.imageUrl
+  previewUrl.value = b.imageUrl.startsWith('data:') ? b.imageUrl : apiBase + b.imageUrl
   selectedFile.value = null
   showForm.value = true
 }
