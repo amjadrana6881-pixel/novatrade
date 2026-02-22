@@ -49,12 +49,12 @@
           <div v-else class="shimmer qr-shimmer"></div>
         </div>
         <div class="address-box mt-16">
-          <label class="fs-12 text-muted">{{ network }} Wallet Address</label>
+          <label class="fs-12 text-muted">{{ network }} Deposit Link / Address</label>
           <div class="address-text">{{ address }}</div>
           <button class="btn btn-primary btn-sm mt-12" @click="copyAddr">
             <span class="flex items-center justify-center">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-4"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              Copy Address
+              Copy Link / Address
             </span>
           </button>
         </div>
@@ -113,20 +113,26 @@ const fetchMethods = async () => {
 }
 
 const updateAddress = () => {
+  // 1. Prioritize Binance Link from .env
+  const envLink = binanceLinks.value[network.value]
+  if (envLink) {
+    address.value = envLink
+    qrUrl.value = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(envLink)}`
+    return
+  }
+
+  // 2. Fallback to manual address from database
   const rawMethods = allMethods.value || []
-  
-  // Migration & Normalization: Handle if data is in old format (array of strings) or new format (array of objects)
   const methods = rawMethods.map(m => {
     if (typeof m === 'string') return { coin: 'USDT', network: 'TRC20', address: m }
     return m
   })
   
-  // Filter by coin (USDT only) and network
   const filtered = methods.filter(m => m.coin === 'USDT' && (m.network === network.value || (network.value === 'TRC20' && !m.network)))
   
   if (filtered.length > 0) {
     address.value = filtered[0].address
-    qrUrl.value = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${address.value}`
+    qrUrl.value = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(address.value)}`
   } else {
     address.value = ''
     qrUrl.value = ''
