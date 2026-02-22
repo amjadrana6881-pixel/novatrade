@@ -46,6 +46,7 @@ const routes = [
             { path: '/settings', name: 'Settings', component: () => import('../pages/Settings.vue') },
             { path: '/trade', name: 'Trade', component: () => import('../pages/Trade.vue') },
             { path: '/pledge', name: 'Pledge', component: () => import('../pages/Pledge.vue') },
+            { path: '/history', name: 'TransactionHistory', component: () => import('../pages/TransactionHistory.vue') },
         ]
     },
     // Auth routes
