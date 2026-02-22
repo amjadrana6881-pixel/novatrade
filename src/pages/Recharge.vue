@@ -66,6 +66,35 @@
         <a v-if="supportLink" :href="supportLink" target="_blank" class="btn btn-outline btn-sm mt-16">Contact Support</a>
       </div>
 
+      <div v-show="address" class="submission-form card mt-16">
+        <h4 class="fs-14 fw-600 mb-12">Submit Deposit Details</h4>
+        <div class="form-group">
+          <label>Deposit Amount (USDT)</label>
+          <input type="number" v-model="form.amount" placeholder="0.00" class="form-input" />
+        </div>
+        <div class="form-group mt-12">
+          <label>Transaction ID (TXID)</label>
+          <input type="text" v-model="form.txHash" placeholder="Enter TXID" class="form-input" />
+        </div>
+        <div class="form-group mt-12">
+          <label>Upload Payment Screenshot</label>
+          <div class="upload-box" @click="$refs.fileInput.click()">
+            <input type="file" ref="fileInput" hidden accept="image/*" @change="handleFile" />
+            <div v-if="form.proof" class="preview-wrap">
+              <img :src="form.proof" class="proof-preview" />
+              <div class="upload-overlay">Change Image</div>
+            </div>
+            <div v-else class="upload-placeholder">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              <div class="fs-12 mt-4">Click to Upload Screenshot</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary w-100 mt-16" :disabled="submitting" @click="submitDeposit">
+          {{ submitting ? 'Submitting...' : 'Submit Review' }}
+        </button>
+      </div>
+
       <div class="card mt-16 warning-card">
         <p class="fs-12">⚠️ Important: Only send <strong>USDT ({{ network }})</strong> to this address. Sending any other coin or using a different network will result in permanent loss.</p>
       </div>
@@ -96,6 +125,12 @@ const qrUrl = ref('')
 const supportLink = ref('')
 const binanceLinks = ref({ TRC20: '', ERC20: '' })
 const allMethods = ref([])
+const submitting = ref(false)
+const form = ref({
+  amount: '',
+  txHash: '',
+  proof: ''
+})
 
 const fetchMethods = async () => {
   try {
@@ -109,6 +144,54 @@ const fetchMethods = async () => {
     }
   } catch (err) {
     console.error(err)
+  }
+}
+
+const handleFile = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  if (file.size > 2 * 1024 * 1024) return alert('File size must be less than 2MB')
+  
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    form.value.proof = ev.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const submitDeposit = async () => {
+  if (!form.value.amount || form.value.amount <= 0) return alert('Please enter a valid amount')
+  if (!form.value.txHash) return alert('Please enter Transaction ID')
+  
+  submitting.value = true
+  try {
+    const token = localStorage.getItem('nt_token')
+    const res = await fetch(`${API_BASE_URL}/api/deposit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        coin: coin.value,
+        network: network.value,
+        amount: form.value.amount,
+        txHash: form.value.txHash,
+        proof: form.value.proof,
+        address: address.value
+      })
+    }).then(r => r.json())
+
+    if (res.success) {
+      alert('Deposit submitted successfully! It will be reviewed by admin.')
+      form.value = { amount: '', txHash: '', proof: '' }
+    } else {
+      alert(res.message || 'Submission failed')
+    }
+  } catch (err) {
+    alert('System error. Please try again later.')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -190,4 +273,14 @@ const copyAddr = () => {
 .ml-8 { margin-left: 8px; }
 .ml-12 { margin-left: 12px; }
 .mr-4 { margin-right: 4px; }
+.w-100 { width: 100%; }
+
+.form-input { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border-light); border-radius: 8px; font-size: 14px; color: var(--text-primary); }
+.upload-box { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; min-height: 120px; display: flex; align-items: center; justify-content: center; background: var(--bg-input); }
+.upload-box:hover { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
+.preview-wrap { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+.proof-preview { width: 100%; height: 100%; object-fit: contain; }
+.upload-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 11px; padding: 4px; opacity: 0; transition: 0.2s; }
+.upload-box:hover .upload-overlay { opacity: 1; }
+.upload-placeholder { color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; }
 </style>
