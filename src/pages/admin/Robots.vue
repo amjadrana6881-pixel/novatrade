@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <div class="info-box">💡 All fields editable. <strong>Fixed Profit</strong> = exact USDT profit after period ends. <strong>Period</strong> defaults to 3 days. Users only need enough balance to purchase (no VIP restriction).</div>
+    <div class="info-box">💡 All fields editable. <strong>Fixed Return</strong> = exact USDT return after lock period ends. <strong>Period</strong> = lock duration in days. Users only need enough balance to start staking (no VIP restriction).</div>
   </div>
 </template>
 <script setup>

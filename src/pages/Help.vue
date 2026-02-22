@@ -22,9 +22,9 @@ const categories = reactive([
     { question: 'How long does withdrawal take?', answer: 'Most withdrawals are processed within 30 minutes. During peak times, it may take up to 24 hours. Make sure you have a transaction password set.', open: false },
     { question: 'What are the withdrawal limits?', answer: 'Withdrawal limits depend on your VIP level. V users can withdraw up to 5 times/day. Higher VIP levels have increased limits.', open: false },
   ]},
-  { title: '🤖 AI Robot', items: [
-    { question: 'How do AI robots work?', answer: 'AI robots use smart algorithms to automatically trade cryptocurrencies 24/7 and generate daily returns based on the robot type purchased.', open: false },
-    { question: 'What is the daily return rate?', answer: 'Returns vary by robot: Basic (1.5%/day), No.1 (2%/day), No.2 (2.2%/day), No.3 (2.5%/day), No.4 (3%/day).', open: false },
+  { title: '📈 Staking Plans', items: [
+    { question: 'How do staking plans work?', answer: 'Choose a staking plan that fits your budget. Lock your USDT for a fixed period and receive guaranteed returns when the plan matures. Your principal plus profit is automatically credited to your wallet.', open: false },
+    { question: 'What are the return rates?', answer: 'Returns depend on the plan tier. Higher value plans generally offer better returns. Check the Earn page for specific rates and lock periods.', open: false },
   ]},
   { title: '👤 Account & Security', items: [
     { question: 'How to reset my password?', answer: 'Go to Login > Forgot Password, enter your email, receive a verification code, and set a new password.', open: false },

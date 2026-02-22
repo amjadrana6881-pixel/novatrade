@@ -119,7 +119,7 @@ const pairFilter = ref('USDT')
 const loadingPrices = ref(true)
 const coins = ref([])
 
-const announcement = ref('Welcome to NovaTrade – Your Trusted Crypto Exchange 🚀')
+const announcement = ref('Welcome to NovaTrade – Stake, Earn & Grow Your Crypto 🚀')
 
 const fetchConfig = async () => {
   try {
@@ -134,7 +134,7 @@ const fetchConfig = async () => {
 }
 
 const defaultBanners = [
-  { title: 'AI Quant Trading', description: 'Smart robots, auto profit 24/7', bg: 'linear-gradient(135deg, #1A3A8A, #1A6CFF)' },
+  { title: 'Staking Rewards', description: 'Earn fixed returns on your crypto', bg: 'linear-gradient(135deg, #1e3a5f, #2563EB)' },
   { title: '50 USDT Reward', description: 'Invite friends & earn trial fund', bg: 'linear-gradient(135deg, #00856F, #00C087)' },
   { title: 'VIP Upgrade', description: 'Higher level, higher returns', bg: 'linear-gradient(135deg, #7C3AED, #A855F7)' }
 ]
@@ -144,7 +144,7 @@ const banners = ref(defaultBanners)
 const actions = [
   { label: 'Deposit', path: '/recharge', bg: '#E8F0FF', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A6CFF" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>' },
   { label: 'Withdraw', path: '/withdraw', bg: '#E6F9F3', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00C087" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>' },
-  { label: 'AI Robot', path: '/ai', bg: '#F3E8FF', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>' },
+  { label: 'Staking', path: '/ai', bg: '#F3E8FF', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>' },
   { label: 'Invite', path: '/invite', bg: '#FFF5EB', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF9F43" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>' },
 ]
 
