@@ -20,31 +20,53 @@
 
     <div class="page-content">
       <!-- Team Stats -->
-      <div class="stats-card">
-        <div class="stat-item">
-          <span class="stat-label">Level 1</span>
-          <span class="stat-value">{{ stats.l1 }}</span>
+      <div class="stats-card-container">
+        <div class="stats-card">
+          <div class="stat-item">
+            <span class="stat-label">L1</span>
+            <span class="stat-value">{{ stats.l1 }}</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-label">L2</span>
+            <span class="stat-value">{{ stats.l2 }}</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-label">L3</span>
+            <span class="stat-value">{{ stats.l3 }}</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-label">L4</span>
+            <span class="stat-value">{{ stats.l4 || 0 }}</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-label">L5</span>
+            <span class="stat-value">{{ stats.l5 || 0 }}</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-label">L6</span>
+            <span class="stat-value">{{ stats.l6 || 0 }}</span>
+          </div>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-label">Level 2</span>
-          <span class="stat-value">{{ stats.l2 }}</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-label">Level 3</span>
-          <span class="stat-value">{{ stats.l3 }}</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-label">Team Balance</span>
-          <span class="stat-value green">${{ stats.teamBalance.toFixed(2) }}</span>
+        <div class="team-balance-card mt-12">
+            <div class="stat-item" style="flex-direction: row; justify-content: space-between; width: 100%;">
+              <span class="stat-label" style="margin-bottom: 0;">Total Team Assets</span>
+              <span class="stat-value green">${{ stats.teamBalance.toFixed(2) }}</span>
+            </div>
         </div>
       </div>
 
       <!-- Referral List Tabs -->
-      <div class="tab-row mt-16">
-        <button v-for="lv in [1,2,3]" :key="lv" class="tab-btn" :class="{active: activeTab===lv}" @click="activeTab=lv">Level {{ lv }} ({{ lv===1?stats.l1:lv===2?stats.l2:stats.l3 }})</button>
+      <div class="tab-scroll-container mt-16">
+        <div class="tab-row">
+          <button v-for="lv in [1,2,3,4,5,6]" :key="lv" class="tab-btn" :class="{active: activeTab===lv}" @click="activeTab=lv">
+            L{{ lv }} ({{ getLevelCount(lv) }})
+          </button>
+        </div>
       </div>
 
       <!-- Referral Users List -->
@@ -65,12 +87,16 @@
 
       <!-- Commission Rates -->
       <div class="card mt-16">
-        <h4 class="fs-14 fw-600 mb-8">Commission Rates</h4>
-        <table class="data-table">
-          <thead><tr><th>Level</th><th>Level 1</th><th>Level 2</th><th>Level 3</th></tr></thead>
-          <tbody><tr v-for="r in rates" :key="r.level"><td class="fw-600">{{r.level}}</td><td>{{r.l1}}</td><td>{{r.l2}}</td><td>{{r.l3}}</td></tr></tbody>
-        </table>
-        <p class="fs-12 text-muted mt-8">All rebates are extracted from actual profits and do not affect your own earnings.</p>
+        <h4 class="fs-14 fw-600 mb-8">Commission Rates (from Profit)</h4>
+        <div class="commission-rates-grid">
+            <div class="rate-box"><span>L1</span><strong>15%</strong></div>
+            <div class="rate-box"><span>L2</span><strong>10%</strong></div>
+            <div class="rate-box"><span>L3</span><strong>7%</strong></div>
+            <div class="rate-box"><span>L4</span><strong>5%</strong></div>
+            <div class="rate-box"><span>L5</span><strong>3%</strong></div>
+            <div class="rate-box"><span>L6</span><strong>2%</strong></div>
+        </div>
+        <p class="fs-12 text-muted mt-12">All commissions are based on the actual profit earned by your team members from their staking plans.</p>
       </div>
     </div>
 
@@ -83,17 +109,18 @@ import { ref, computed, onMounted } from 'vue'
 import API_BASE_URL from '../config/api.js'
 
 const inviteCode = ref('')
-const stats = ref({ l1: 0, l2: 0, l3: 0, l3: 0, teamBalance: 0 })
-const referrals = ref({ level1: [], level2: [], level3: [] })
-const rates = ref([])
+const stats = ref({ l1: 0, l2: 0, l3: 0, l4: 0, l5: 0, l6: 0, teamBalance: 0 })
+const referrals = ref({ level1: [], level2: [], level3: [], level4: [], level5: [], level6: [] })
 const activeTab = ref(1)
 const copied = ref(false)
 
 const currentList = computed(() => {
-  if (activeTab.value === 1) return referrals.value.level1
-  if (activeTab.value === 2) return referrals.value.level2
-  return referrals.value.level3
+  return referrals.value[`level${activeTab.value}`] || []
 })
+
+const getLevelCount = (lv) => {
+  return stats.value[`l${lv}`] || 0
+}
 
 const maskEmail = (email) => {
   if (!email) return '***'
@@ -145,7 +172,6 @@ const copyLink = () => {
 }
 
 onMounted(() => {
-  fetchConfig()
   fetchReferrals()
 })
 </script>
@@ -156,15 +182,18 @@ onMounted(() => {
 .btn-invite{background:rgba(255,255,255,0.15);color:white;border-radius:var(--radius-md);padding:12px 20px;width:100%;font-weight:600;font-size:14px;border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .btn-invite:active{background:rgba(255,255,255,0.25)}
 
-.stats-card{display:flex;background:var(--bg-card);padding:16px;border-radius:var(--radius-lg);border:1px solid var(--border-light)}
-.stat-item{display:flex;flex-direction:column;align-items:center;flex:1}
-.stat-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
-.stat-value{font-size:18px;font-weight:700;color:var(--text-primary)}
+.stats-card-container { display: flex; flex-direction: column; gap: 8px; }
+.stats-card{display:flex;background:var(--bg-card);padding:12px;border-radius:var(--radius-lg);border:1px solid var(--border-light);overflow-x: auto; -webkit-overflow-scrolling: touch;}
+.stat-item{display:flex;flex-direction:column;align-items:center;min-width: 50px; flex: 1;}
+.stat-label{font-size:10px;color:var(--text-muted);margin-bottom:4px}
+.stat-value{font-size:16px;font-weight:700;color:var(--text-primary)}
 .stat-value.green{color:#00C087}
-.stat-divider{width:1px;background:var(--border-light);margin:4px 0}
+.stat-divider{width:1px;background:var(--border-light);margin:4px 0; min-width: 1px;}
+.team-balance-card { background: var(--bg-card); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-light); }
 
-.tab-row{display:flex;gap:6px;background:var(--bg-card);border-radius:var(--radius-md);padding:4px;border:1px solid var(--border-light)}
-.tab-btn{flex:1;padding:8px 4px;border:none;border-radius:var(--radius-sm);background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-muted)}
+.tab-scroll-container { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+.tab-row{display:inline-flex; gap:6px; background:var(--bg-card); border-radius:var(--radius-md); padding:4px; border:1px solid var(--border-light); min-width: 100%;}
+.tab-btn{padding:8px 12px; border:none; border-radius:var(--radius-sm); background:transparent; font-size:12px; font-weight:500; cursor:pointer; color:var(--text-muted); white-space: nowrap;}
 .tab-btn.active{background:var(--primary);color:white}
 
 .referral-list{display:flex;flex-direction:column;gap:8px}
@@ -177,6 +206,11 @@ onMounted(() => {
 .ref-balance{text-align:right}
 .ref-balance-val{font-size:14px;font-weight:700;color:#00C087}
 .ref-balance-label{font-size:10px;color:var(--text-muted)}
+
+.commission-rates-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.rate-box { background: var(--bg); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 4px; }
+.rate-box span { font-size: 11px; color: var(--text-muted); }
+.rate-box strong { font-size: 15px; color: var(--primary); font-weight: 700; }
 
 .copy-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1D26;color:white;padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
