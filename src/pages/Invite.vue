@@ -131,24 +131,6 @@ const maskEmail = (email) => {
   return `${visible}${stars}@${domain}`
 }
 
-const fetchConfig = async () => {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/config/public`)
-    const data = await res.json()
-    if (data.success && data.data.referral_rates) {
-      rates.value = data.data.referral_rates
-    }
-  } catch (err) {
-    rates.value = [
-      {level:'V-V4',l1:'10%',l2:'3%',l3:'1%'},
-      {level:'V5',l1:'11%',l2:'4%',l3:'1%'},
-      {level:'V6',l1:'12%',l2:'5%',l3:'1%'},
-      {level:'V7',l1:'13%',l2:'6%',l3:'1%'},
-      {level:'V8',l1:'14%',l2:'7%',l3:'1%'},
-    ]
-  }
-}
-
 const fetchReferrals = async () => {
   const token = localStorage.getItem('nt_token')
   if (!token) return
