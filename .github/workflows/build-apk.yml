@@ -35,7 +35,7 @@ jobs:
         run: |
           # Debug info
           ls -R dist | head -n 20
-          npx cap sync android --verbose
+          npx cap sync android
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
