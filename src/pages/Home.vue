@@ -243,7 +243,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  padding-top: calc(var(--safe-top) + 12px);
+  padding-top: var(--safe-top);
+  min-height: calc(56px + var(--safe-top));
   background: var(--bg-card);
 }
 

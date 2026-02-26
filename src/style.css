@@ -39,9 +39,9 @@
   --gradient-header: linear-gradient(135deg, #1e3a5f, #2563EB);
   --gradient-gold: linear-gradient(135deg, #D4A843, #F5D78E);
 
-  /* Spacing */
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Safe Area & Spacing */
+  --safe-top: env(safe-area-inset-top, 20px);
+  --safe-bottom: env(safe-area-inset-bottom, 10px);
   --nav-height: 60px;
   --header-height: 52px;
 
@@ -149,7 +149,7 @@ h6 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--header-height);
+  min-height: calc(var(--header-height) + var(--safe-top));
   padding: 0 16px;
   padding-top: var(--safe-top);
   background: var(--bg-card);
