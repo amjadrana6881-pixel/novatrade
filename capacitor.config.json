@@ -3,7 +3,7 @@
     "appName": "NovaTrade",
     "webDir": "dist",
     "server": {
-        "url": "https://novatrade-lypase.vercel.app",
+        "url": "https://novatrade-zeta.vercel.app",
         "cleartext": true
     },
     "android": {
