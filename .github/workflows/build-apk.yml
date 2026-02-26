@@ -31,13 +31,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: 'tools platform-tools platforms;android-34 build-tools;34.0.0'
-
       - name: Capacitor Sync
-        run: npx cap sync android
+        run: |
+          # Debug info
+          ls -R dist | head -n 20
+          npx cap sync android --verbose
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
@@ -45,7 +43,6 @@ jobs:
       - name: Build Debug APK
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace

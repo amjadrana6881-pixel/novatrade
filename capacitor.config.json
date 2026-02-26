@@ -1,0 +1,15 @@
+{
+    "appId": "com.novatrade.app",
+    "appName": "NovaTrade",
+    "webDir": "dist",
+    "server": {
+        "url": "https://novatrade-lypase.vercel.app",
+        "cleartext": true
+    },
+    "android": {
+        "buildOptions": {
+            "keystorePath": null,
+            "keystoreAlias": null
+        }
+    }
+}
