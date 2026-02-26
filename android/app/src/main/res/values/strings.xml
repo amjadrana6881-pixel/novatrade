@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NovaTrade</string>
+    <string name="title_activity_main">NovaTrade</string>
+    <string name="package_name">com.novatrade.app</string>
+    <string name="custom_url_scheme">com.novatrade.app</string>
+</resources>
