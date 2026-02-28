@@ -193,16 +193,40 @@
 
     <!-- Wallet Modal -->
     <div v-if="walletUser" class="modal-overlay" @click.self="walletUser=null">
-      <div class="modal-card">
-        <h3>Wallet: {{ walletUser.email }}</h3>
+      <div class="modal-card wallet-modal">
+        <div class="wallet-modal-header">
+          <h3>💰 {{ walletUser.email }}</h3>
+          <button class="close-btn" @click="walletUser=null">✕</button>
+        </div>
+
+        <!-- USDT Balance Highlight -->
+        <div v-if="walletBalances.length > 0" class="usdt-highlight">
+          <div class="usdt-label">USDT Balance (Spot)</div>
+          <div class="usdt-amount">{{ usdtBalance }}</div>
+        </div>
+
+        <!-- All Balances -->
+        <div v-if="walletBalances.length > 0" class="wallet-balances">
+          <div class="wb-title">All Coin Balances</div>
+          <div class="wb-grid">
+            <div v-for="w in walletBalances" :key="w.id" class="wb-item">
+              <span class="wb-coin">{{ w.coin }}</span>
+              <span class="wb-val">{{ w.available?.toFixed(4) }}</span>
+              <span v-if="w.frozen > 0" class="wb-frozen">❄ {{ w.frozen?.toFixed(2) }}</span>
+            </div>
+          </div>
+        </div>
+        <div v-else class="wallet-loading">Loading balances...</div>
+
+        <!-- Add/Deduct Form -->
+        <div class="wb-title mt-16">Modify Balance</div>
         <div class="modal-form">
-          <select v-model="walletForm.coin" class="mini-select"><option v-for="c in ['USDT','BTC','ETH','BNB','XRP','SOL','DOGE','ADA','DOT','AVAX']" :key="c">{{c}}</option></select>
+          <select v-model="walletForm.coin" class="mini-select"><option v-for="c in ['USDT','BTC','ETH','BNB','XRP','SOL','DOGE','ADA','DOT','AVAX','MATIC','LINK','UNI','LTC','ATOM','TRX','SHIB','FIL']" :key="c">{{c}}</option></select>
           <input v-model="walletForm.amount" type="number" placeholder="Amount" class="mini-input"/>
-          <select v-model="walletForm.action" class="mini-select"><option value="add">Add</option><option value="deduct">Deduct</option></select>
+          <select v-model="walletForm.action" class="mini-select"><option value="add">➕ Add</option><option value="deduct">➖ Deduct</option></select>
           <button class="action-btn success" @click="modifyWallet">Apply</button>
         </div>
-        <div v-if="walletMsg" class="wallet-msg">{{ walletMsg }}</div>
-        <button class="close-modal-btn" @click="walletUser=null">Close</button>
+        <div v-if="walletMsg" class="wallet-msg" :class="{'wallet-msg-error': walletMsg.includes('Insufficient') || walletMsg.includes('error')}">{{ walletMsg }}</div>
       </div>
     </div>
   </div>
@@ -236,11 +260,37 @@ const updateUser = async (id, data) => {
   fetchUsers()
 }
 
-const openWallet = (u) => { walletUser.value = u; walletMsg.value = '' }
+const walletBalances = ref([])
+const usdtBalance = ref('0.00')
+
+const fetchWalletBalances = async (userId) => {
+  try {
+    const res = await fetch(`${API}/admin/users/${userId}/details`, { headers }).then(r => r.json())
+    if (res.success && res.data.wallets) {
+      // Only show spot wallets with non-zero balances, plus always show USDT
+      walletBalances.value = res.data.wallets.filter(w => w.account === 'spot' && (w.available > 0 || w.frozen > 0 || w.coin === 'USDT'))
+      const usdt = res.data.wallets.find(w => w.coin === 'USDT' && w.account === 'spot')
+      usdtBalance.value = usdt ? usdt.available.toFixed(2) : '0.00'
+    }
+  } catch (err) {
+    console.error('Failed to fetch wallet balances', err)
+  }
+}
+
+const openWallet = (u) => {
+  walletUser.value = u
+  walletMsg.value = ''
+  walletBalances.value = []
+  usdtBalance.value = '0.00'
+  fetchWalletBalances(u.id)
+}
+
 const modifyWallet = async () => {
   if (!walletForm.amount) return
   const res = await fetch(`${API}/admin/users/${walletUser.value.id}/wallet`, { method: 'POST', headers, body: JSON.stringify(walletForm) }).then(r => r.json())
   walletMsg.value = res.message || res.error || 'Done'
+  // Refresh balances after modification
+  if (res.success) fetchWalletBalances(walletUser.value.id)
 }
 
 const showDetails = async (u) => {
@@ -302,7 +352,23 @@ onMounted(fetchUsers)
 .modal-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .mini-input{padding:6px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;width:100px}
 .wallet-msg{margin-top:12px;padding:8px;background:#ECFDF5;color:#10B981;border-radius:6px;font-size:13px}
-.close-modal-btn{margin-top:12px;padding:6px 16px;border:1px solid #E2E8F0;border-radius:6px;background:white;cursor:pointer;font-size:13px}
+.wallet-msg-error{background:#FEF2F2;color:#EF4444}
+.mt-16{margin-top:16px}
+
+.wallet-modal{max-height:80vh;overflow-y:auto}
+.wallet-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.wallet-modal-header h3{margin:0}
+.usdt-highlight{background:linear-gradient(135deg,#1E40AF,#3B82F6);color:white;border-radius:12px;padding:16px;margin-bottom:16px;text-align:center}
+.usdt-label{font-size:12px;opacity:0.8;margin-bottom:4px}
+.usdt-amount{font-size:28px;font-weight:700;font-family:'Outfit',monospace}
+.wallet-balances{margin-bottom:16px}
+.wb-title{font-size:12px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.wb-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.wb-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#F8FAFC;border-radius:6px;font-size:12px;border:1px solid #F1F5F9}
+.wb-coin{font-weight:700;color:#2563EB;min-width:48px}
+.wb-val{font-weight:600;color:#0F172A}
+.wb-frozen{font-size:10px;color:#EF4444}
+.wallet-loading{padding:20px;text-align:center;color:#94A3B8;font-size:13px}
 
 /* Detail Panel */
 .detail-panel{background:white;border-radius:16px;width:720px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.15)}
