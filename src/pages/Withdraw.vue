@@ -10,7 +10,7 @@
     <div class="page-content">
       <div class="input-group">
         <label>Coin</label>
-        <select v-model="coin" class="input-field" @change="updateBalance">
+        <select v-model="coin" class="input-field" @change="onCoinChange">
           <option v-for="c in coins" :key="c" :value="c">{{ c }}</option>
         </select>
       </div>
@@ -20,6 +20,18 @@
           <option v-for="n in networks" :key="n" :value="n">{{ n }}</option>
         </select>
       </div>
+
+      <!-- Saved Addresses Selector -->
+      <div class="input-group" v-if="filteredAddresses.length > 0">
+        <label>Saved Addresses</label>
+        <select v-model="selectedAddressId" class="input-field" @change="onSelectSavedAddress">
+          <option value="">-- Select a saved address --</option>
+          <option v-for="addr in filteredAddresses" :key="addr.id" :value="addr.id">
+            {{ addr.label }} — {{ addr.address.slice(0,10) }}...{{ addr.address.slice(-6) }}
+          </option>
+        </select>
+      </div>
+
       <div class="input-group">
         <label>Withdrawal Address</label>
         <input v-model="address" class="input-field" placeholder="Enter or paste your withdrawal address" />
@@ -28,7 +40,7 @@
         <label>Amount</label>
         <div class="input-with-action">
           <input v-model="amount" type="number" class="input-field" :placeholder="`Minimum 10 ${coin}`" />
-          <button class="input-action-btn" @click="amount = balance">All</button>
+          <button class="input-action-btn" @click="amount = availableForWithdraw">All</button>
         </div>
       </div>
       <div class="flex justify-between fs-12 text-muted mb-8">
@@ -63,6 +75,8 @@ const loading = ref(false)
 const msg = ref('')
 const success = ref(false)
 const wallets = ref([])
+const savedAddresses = ref([])
+const selectedAddressId = ref('')
 
 const coins = ['USDT','BTC','ETH','BNB','XRP','SOL','DOGE','ADA','DOT','AVAX']
 const networks = ['TRC20','ERC20','BEP20']
@@ -74,12 +88,39 @@ const balance = computed(() => {
   return w ? parseFloat(w.available).toFixed(4) : '0.0000'
 })
 
+const availableForWithdraw = computed(() => {
+  const bal = parseFloat(balance.value)
+  return Math.max(0, bal).toFixed(4)
+})
+
 const receiveAmount = computed(() => {
   const amt = parseFloat(amount.value || 0)
   return Math.max(0, amt - fee.value).toFixed(4)
 })
 
-const updateBalance = () => { /* reactive via computed */ }
+// Filter saved addresses by selected coin and network
+const filteredAddresses = computed(() => {
+  return savedAddresses.value.filter(a => a.coin === coin.value && a.network === network.value)
+})
+
+const onCoinChange = () => {
+  selectedAddressId.value = ''
+  address.value = ''
+}
+
+const onSelectSavedAddress = () => {
+  if (selectedAddressId.value) {
+    const addr = savedAddresses.value.find(a => a.id === selectedAddressId.value)
+    if (addr) {
+      address.value = addr.address
+      // Also sync coin & network if different
+      if (addr.coin !== coin.value) coin.value = addr.coin
+      if (addr.network !== network.value) network.value = addr.network
+    }
+  } else {
+    address.value = ''
+  }
+}
 
 const fetchWallets = async () => {
   try {
@@ -88,7 +129,21 @@ const fetchWallets = async () => {
       headers: { Authorization: `Bearer ${token}` }
     })
     const data = await res.json()
-    if (data.success) wallets.value = data.data
+    if (data.success) {
+      // The API returns { success, data: { wallets: [...], totalUSD, totalBTC } }
+      wallets.value = data.data.wallets || data.data || []
+    }
+  } catch (e) { console.error(e) }
+}
+
+const fetchSavedAddresses = async () => {
+  try {
+    const token = localStorage.getItem('nt_token')
+    const res = await fetch(`${API_BASE_URL}/api/user/addresses`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    const data = await res.json()
+    if (data.success) savedAddresses.value = data.data || []
   } catch (e) { console.error(e) }
 }
 
@@ -120,6 +175,7 @@ const submit = async () => {
       amount.value = ''
       address.value = ''
       txPassword.value = ''
+      selectedAddressId.value = ''
       fetchWallets()
     } else {
       success.value = false
@@ -133,7 +189,10 @@ const submit = async () => {
   }
 }
 
-onMounted(fetchWallets)
+onMounted(() => {
+  fetchWallets()
+  fetchSavedAddresses()
+})
 </script>
 <style scoped>
 .feedback-msg{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500}
