@@ -59,6 +59,52 @@
       <button class="btn btn-primary mt-8" :disabled="loading" @click="submit">
         {{ loading ? 'Submitting...' : 'Submit Withdrawal' }}
       </button>
+
+      <!-- Withdrawal History -->
+      <div class="history-section">
+        <div class="history-header">
+          <span class="history-title">Withdrawal History</span>
+          <span class="history-count" v-if="withdrawalHistory.length > 0">{{ withdrawalHistory.length }}</span>
+        </div>
+
+        <div v-if="historyLoading" class="history-loading">Loading...</div>
+
+        <div v-else-if="withdrawalHistory.length === 0" class="history-empty">
+          <div class="history-empty-icon">📋</div>
+          <div>No withdrawals yet</div>
+        </div>
+
+        <div v-else class="history-list">
+          <div v-for="w in withdrawalHistory" :key="w.id" class="history-card">
+            <div class="history-card-top">
+              <div class="history-card-coin">
+                <div class="history-coin-badge">{{ w.coin }}</div>
+                <div>
+                  <div class="fw-600 fs-14">{{ w.amount }} {{ w.coin }}</div>
+                  <div class="fs-11 text-muted">{{ w.network }} · Fee: {{ w.fee }}</div>
+                </div>
+              </div>
+              <span class="history-status" :class="w.status">{{ w.status }}</span>
+            </div>
+            <div class="history-card-row">
+              <span class="text-muted">Address</span>
+              <span class="mono fs-11 history-addr">{{ w.address.slice(0,12) }}...{{ w.address.slice(-8) }}</span>
+            </div>
+            <div class="history-card-row">
+              <span class="text-muted">Receive</span>
+              <span class="fw-500">{{ (w.amount - w.fee).toFixed(4) }} {{ w.coin }}</span>
+            </div>
+            <div class="history-card-row">
+              <span class="text-muted">Date</span>
+              <span class="fs-12">{{ formatDate(w.createdAt) }}</span>
+            </div>
+            <div v-if="w.txHash" class="history-card-row">
+              <span class="text-muted">TX Hash</span>
+              <span class="mono fs-11">{{ w.txHash.slice(0,16) }}...</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -77,6 +123,8 @@ const success = ref(false)
 const wallets = ref([])
 const savedAddresses = ref([])
 const selectedAddressId = ref('')
+const withdrawalHistory = ref([])
+const historyLoading = ref(false)
 
 const coins = ['USDT','BTC','ETH','BNB','XRP','SOL','DOGE','ADA','DOT','AVAX']
 const networks = ['TRC20','ERC20','BEP20']
@@ -103,6 +151,11 @@ const filteredAddresses = computed(() => {
   return savedAddresses.value.filter(a => a.coin === coin.value && a.network === network.value)
 })
 
+const formatDate = (dateStr) => {
+  const d = new Date(dateStr)
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
 const onCoinChange = () => {
   selectedAddressId.value = ''
   address.value = ''
@@ -113,7 +166,6 @@ const onSelectSavedAddress = () => {
     const addr = savedAddresses.value.find(a => a.id === selectedAddressId.value)
     if (addr) {
       address.value = addr.address
-      // Also sync coin & network if different
       if (addr.coin !== coin.value) coin.value = addr.coin
       if (addr.network !== network.value) network.value = addr.network
     }
@@ -147,6 +199,19 @@ const fetchSavedAddresses = async () => {
   } catch (e) { console.error(e) }
 }
 
+const fetchWithdrawalHistory = async () => {
+  historyLoading.value = true
+  try {
+    const token = localStorage.getItem('nt_token')
+    const res = await fetch(`${API_BASE_URL}/api/withdraw`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    const data = await res.json()
+    if (data.success) withdrawalHistory.value = data.data || []
+  } catch (e) { console.error(e) }
+  finally { historyLoading.value = false }
+}
+
 const submit = async () => {
   msg.value = ''
   if (!address.value) return (msg.value = 'Please enter withdrawal address')
@@ -177,6 +242,7 @@ const submit = async () => {
       txPassword.value = ''
       selectedAddressId.value = ''
       fetchWallets()
+      fetchWithdrawalHistory()
     } else {
       success.value = false
       msg.value = data.message || 'Withdrawal failed'
@@ -192,10 +258,38 @@ const submit = async () => {
 onMounted(() => {
   fetchWallets()
   fetchSavedAddresses()
+  fetchWithdrawalHistory()
 })
 </script>
 <style scoped>
 .feedback-msg{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500}
 .feedback-msg.success{background:#E6F9F1;color:#00C087}
 .feedback-msg.error{background:#FFF1F3;color:#FF4D6A}
+
+/* History Section */
+.history-section{margin-top:28px;padding-top:20px;border-top:1px solid var(--border-light, #E8ECF2)}
+.history-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.history-title{font-size:16px;font-weight:700;color:var(--text, #1A1D26)}
+.history-count{background:var(--primary, #1A6CFF);color:white;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;min-width:20px;text-align:center}
+.history-loading{text-align:center;padding:24px;color:#9CA3AF;font-size:13px}
+.history-empty{text-align:center;padding:32px 16px;color:#9CA3AF;font-size:13px}
+.history-empty-icon{font-size:28px;margin-bottom:8px}
+.history-list{display:flex;flex-direction:column;gap:10px}
+
+.history-card{background:var(--bg-card, #fff);border:1px solid var(--border-light, #E8ECF2);border-radius:12px;padding:14px 16px;transition:box-shadow 0.15s}
+.history-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+.history-card-coin{display:flex;align-items:center;gap:10px}
+.history-coin-badge{background:linear-gradient(135deg,#1A6CFF,#4A9CFF);color:white;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;letter-spacing:.5px}
+
+.history-status{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;text-transform:capitalize;letter-spacing:.3px}
+.history-status.pending{background:#FFF8ED;color:#E6A01F;border:1px solid #FFE4A0}
+.history-status.approved{background:#E6F9F1;color:#00A870;border:1px solid #B5EEDD}
+.history-status.rejected{background:#FFF1F3;color:#E03E5A;border:1px solid #FFBDCA}
+
+.history-card-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid var(--border-light, #F4F6FA)}
+.history-card-row:last-child{border:none}
+.history-card-row .text-muted{color:#9CA3AF;font-size:12px}
+.history-addr{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mono{font-family:'SF Mono',Monaco,Consolas,monospace}
+.fw-500{font-weight:500}.fw-600{font-weight:600}.fs-11{font-size:11px}.fs-12{font-size:12px}.fs-14{font-size:14px}.text-muted{color:#9CA3AF}
 </style>
