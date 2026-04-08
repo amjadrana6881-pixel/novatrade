@@ -45,7 +45,7 @@
       </div>
       <div class="flex justify-between fs-12 text-muted mb-8">
         <span>Available: <span class="fw-600" style="color:var(--text)">{{ balance }} {{ coin }}</span></span>
-        <span>Fee: {{ fee }} {{ coin }}</span>
+        <span>Fee: 10% ({{ fee }} {{ coin }})</span>
       </div>
       <div class="flex justify-between fs-13 mb-16">
         <span>You will receive</span>
@@ -129,7 +129,10 @@ const historyLoading = ref(false)
 const coins = ['USDT','BTC','ETH','BNB','XRP','SOL','DOGE','ADA','DOT','AVAX']
 const networks = ['TRC20','ERC20','BEP20']
 
-const fee = computed(() => coin.value === 'USDT' ? 1 : 0.0001)
+const fee = computed(() => {
+  const amt = parseFloat(amount.value || 0)
+  return parseFloat((amt * 0.10).toFixed(4))
+})
 
 const balance = computed(() => {
   const w = wallets.value.find(w => w.coin === coin.value && w.account === 'spot')
